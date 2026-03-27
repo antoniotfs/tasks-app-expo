@@ -1,53 +1,47 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Feather, AntDesign } from '@expo/vector-icons';
+import { FlatList, Text, StyleSheet, View } from 'react-native';
+import { TaskItem } from './TaskItem';
+import { TaskItem as TaskData } from '../utils/handle-api';
 
-interface TaskProps {
-  text: string;
-  updateMode: () => void;
-  deleteToDo: () => void;
+interface TaskListProps {
+  tasks: TaskData[];
+  onEdit: (id: string, text: string) => void;
+  onDelete: (id: string) => void;
 }
 
-const Task: React.FC<TaskProps> = ({ text, updateMode, deleteToDo }) => {
+export const Task: React.FC<TaskListProps> = ({ tasks, onEdit, onDelete }) => {
+  
+  // Ordena as tarefas em ordem alfabética (A-Z)
+  const sortedTasks = [...tasks].sort((a, b) => 
+    a.text.localeCompare(b.text)
+  );
+
   return (
-    <View style={styles.todo}>
-      <Text style={styles.text}>{text}</Text>
-      <View style={styles.icons}>
-        <TouchableOpacity onPress={updateMode}>
-          <Feather name="edit" size={20} color="#fff" style={styles.icon} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={deleteToDo}>
-          <AntDesign name="delete" size={20} color="#fff" style={styles.icon} />
-        </TouchableOpacity>
-      </View>
-    </View>
+    <FlatList
+      data={sortedTasks}
+      keyExtractor={(item) => item._id}
+      renderItem={({ item }) => (
+        <TaskItem 
+          text={item.text} 
+          onEdit={() => onEdit(item._id, item.text)} 
+          onDelete={() => onDelete(item._id)} 
+        />
+      )}
+      contentContainerStyle={styles.listContent}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  todo: {
-    backgroundColor: '#000',
-    paddingVertical: 24,
-    paddingHorizontal: 32, // Adjusted from rem
-    borderRadius: 5,
+  listContent: {
+    paddingBottom: 100,
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    backgroundColor: '#fff',
+    paddingVertical: 8,
+    marginBottom: 8,
     marginTop: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  text: {
-    color: '#fff',
-    fontSize: 16,
-    flex: 1,
-  },
-  icons: {
-    flexDirection: 'row',
-    gap: 16,
-    marginLeft: 16,
-  },
-  icon: {
-    padding: 2,
   },
 });
-
-export default Task;
